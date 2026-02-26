@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.name }} - Gym App{% endblock %}
+
+{% block content %}
+<h1>{{ object.name }}</h1>
+
+{% if object.description %}
+<p>{{ object.description }}</p>
+{% endif %}
+
+<table>
+    <tr><th>Trainer</th><td>{{ object.trainer|default:"TBA" }}{% if object.trainer and object.trainer.bio %} — {{ object.trainer.bio }}{% endif %}</td></tr>
+    <tr><th>Date &amp; Time</th><td>{{ object.scheduled_at|date:"M d, Y H:i" }}</td></tr>
+    <tr><th>Duration</th><td>{{ object.duration_minutes }} min</td></tr>
+    <tr><th>Availability</th><td>{{ object.available_spots }} / {{ object.max_capacity }} spots</td></tr>
+</table>
+
+<div style="margin-top: 20px;">
+    {% if user.is_authenticated %}
+        {% if already_booked %}
+            <p><strong>You have already booked this class.</strong></p>
+        {% elif object.available_spots > 0 %}
+            <form method="post" action="{% url 'booking-create' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Book This Class</button>
+            </form>
+        {% else %}
+            <p><strong>This class is full.</strong></p>
+        {% endif %}
+    {% else %}
+        <p><a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to book this class.</p>
+    {% endif %}
+</div>
+
+<p style="margin-top: 15px;"><a href="{% url 'class-list' %}">&larr; Back to all classes</a></p>
+{% endblock %}

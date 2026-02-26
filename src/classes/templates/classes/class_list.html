@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Available Classes - Gym App{% endblock %}
+
+{% block content %}
+<h1>Available Classes</h1>
+
+{% if object_list %}
+<table>
+    <thead>
+        <tr>
+            <th>Class</th>
+            <th>Trainer</th>
+            <th>Date &amp; Time</th>
+            <th>Duration</th>
+            <th>Availability</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for class in object_list %}
+        <tr>
+            <td><a href="{% url 'class-detail' class.pk %}">{{ class.name }}</a></td>
+            <td>{{ class.trainer|default:"TBA" }}</td>
+            <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
+            <td>{{ class.duration_minutes }} min</td>
+            <td>{{ class.available_spots }} / {{ class.max_capacity }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No classes are currently available.</p>
+{% endif %}
+{% endblock %}
