@@ -13,14 +13,14 @@
     <tr><th>Trainer</th><td>{{ object.trainer|default:"TBA" }}{% if object.trainer and object.trainer.bio %} — {{ object.trainer.bio }}{% endif %}</td></tr>
     <tr><th>Date &amp; Time</th><td>{{ object.scheduled_at|date:"M d, Y H:i" }}</td></tr>
     <tr><th>Duration</th><td>{{ object.duration_minutes }} min</td></tr>
-    <tr><th>Availability</th><td>{{ object.available_spots }} / {{ object.max_capacity }} spots</td></tr>
+    <tr><th>Availability</th><td>{{ object.available_spots_display }} / {{ object.max_capacity }} spots</td></tr>
 </table>
 
 <div style="margin-top: 20px;">
     {% if user.is_authenticated %}
         {% if already_booked %}
             <p><strong>You have already booked this class.</strong></p>
-        {% elif object.available_spots > 0 %}
+        {% elif not object.is_full %}
             <form method="post" action="{% url 'booking-create' object.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="btn">Book This Class</button>

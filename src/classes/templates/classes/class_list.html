@@ -18,16 +18,16 @@
     </thead>
     <tbody>
         {% for class in object_list %}
-        <tr{% if class.available_spots == 0 %} class="full-class"{% endif %}>
+        <tr{% if class.is_full %} class="full-class"{% endif %}>
             <td><a href="{% url 'class-detail' class.pk %}">{{ class.name }}</a></td>
             <td>{{ class.trainer|default:"TBA" }}</td>
             <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
             <td>{{ class.duration_minutes }} min</td>
             <td>
-                {% if class.available_spots == 0 %}
+                {% if class.is_full %}
                     <strong>Full</strong>
                 {% else %}
-                    {{ class.available_spots }} / {{ class.max_capacity }}
+                    {{ class.available_spots_display }} / {{ class.max_capacity }}
                 {% endif %}
             </td>
         </tr>

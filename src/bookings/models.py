@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 
 
 class Booking(models.Model):
@@ -26,6 +26,29 @@ class Booking(models.Model):
                 name='unique_booking',
             ),
         ]
+
+    @classmethod
+    def create_for_member(cls, member, gym_class_id):
+        """Create a booking atomically while enforcing capacity limits."""
+        from src.classes.models import GymClass
+
+        with transaction.atomic():
+            gym_class = GymClass.objects.select_for_update().get(pk=gym_class_id)
+
+            duplicate_exists = cls.objects.filter(
+                member=member,
+                gym_class=gym_class,
+            ).exists()
+            if duplicate_exists:
+                raise ValidationError(
+                    'This member already has a booking for this class.'
+                )
+
+            current_bookings = cls.objects.filter(gym_class=gym_class).count()
+            if current_bookings >= gym_class.max_capacity:
+                raise ValidationError('This class is full.')
+
+            return cls.objects.create(member=member, gym_class=gym_class)
 
     def __str__(self):
         return f'{self.member} \u2192 {self.gym_class}'

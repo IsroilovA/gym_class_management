@@ -33,22 +33,20 @@ class BookingCreateView(LoginRequiredMixin, View):
     def post(self, request, class_id):
         gym_class = get_object_or_404(GymClass, pk=class_id)
 
-        booking = Booking(member=request.user, gym_class=gym_class)
-
         try:
-            booking.full_clean()
+            booking = Booking.create_for_member(
+                member=request.user,
+                gym_class_id=gym_class.pk,
+            )
+        except IntegrityError:
+            messages.warning(request, 'You have already booked this class.')
+            return redirect('class-detail', pk=gym_class.pk)
         except ValidationError as e:
             for msg in e.messages:
                 messages.error(request, msg)
             return redirect('class-detail', pk=gym_class.pk)
 
-        try:
-            booking.save()
-        except IntegrityError:
-            messages.warning(request, 'You have already booked this class.')
-            return redirect('class-detail', pk=gym_class.pk)
-
-        messages.success(request, f'Successfully booked {gym_class.name}!')
+        messages.success(request, f'Successfully booked {booking.gym_class.name}!')
         return redirect('booking-list')
 
 

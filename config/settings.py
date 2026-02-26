@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,13 +26,49 @@ load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development').lower()
+IS_PRODUCTION = ENVIRONMENT == 'production'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'change-me')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+if not SECRET_KEY:
+    SECRET_KEY = 'dev-only-insecure-secret-key-change-me'
+
+if IS_PRODUCTION:
+    insecure_values = {
+        'change-me',
+        'change-me-to-a-real-secret-key',
+        'replace-me',
+        'secret',
+    }
+    if (
+        len(SECRET_KEY) < 32
+        or SECRET_KEY.lower() in insecure_values
+        or SECRET_KEY.startswith('dev-only-')
+        or SECRET_KEY.startswith('django-insecure-')
+    ):
+        raise ImproperlyConfigured(
+            'SECRET_KEY must be set to a strong unique value in production.'
+        )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
+if IS_PRODUCTION and DEBUG:
+    raise ImproperlyConfigured('DEBUG must be False in production.')
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+
+SECURE_SSL_REDIRECT = IS_PRODUCTION
+SESSION_COOKIE_SECURE = IS_PRODUCTION
+CSRF_COOKIE_SECURE = IS_PRODUCTION
+SECURE_HSTS_SECONDS = 31536000 if IS_PRODUCTION else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = IS_PRODUCTION
+SECURE_HSTS_PRELOAD = IS_PRODUCTION
+
+if IS_PRODUCTION:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition

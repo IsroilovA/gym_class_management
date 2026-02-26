@@ -52,3 +52,13 @@ class GymClass(models.Model):
         if count is None:
             count = self.bookings.count()
         return self.max_capacity - count
+
+    @property
+    def is_full(self):
+        """Return whether the class has no remaining capacity."""
+        return self.available_spots <= 0
+
+    @property
+    def available_spots_display(self):
+        """Return a non-negative availability value for UI display."""
+        return max(self.available_spots, 0)
