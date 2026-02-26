@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.db.models import Count, F
+from django.db.models import Count, F, Value
+from django.db.models.functions import Greatest
 from django.template.response import TemplateResponse
 from django.urls import path
 
@@ -50,7 +51,12 @@ class BookingAdmin(admin.ModelAdmin):
         classes = (
             GymClass.objects.select_related('trainer')
             .annotate(booking_count=Count('bookings'))
-            .annotate(remaining_spots=F('max_capacity') - F('booking_count'))
+            .annotate(
+                remaining_spots=Greatest(
+                    F('max_capacity') - F('booking_count'),
+                    Value(0),
+                )
+            )
             .order_by('scheduled_at')
         )
         context = {
