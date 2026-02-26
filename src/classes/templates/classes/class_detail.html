@@ -5,8 +5,7 @@
 {% block content %}
 <div class="page-header">
     <h1>{{ object.name }}</h1>
-    <a href="{% url 'class-list' %}" class="btn"
-        style="background: white; color: var(--text-main); border: 1px solid var(--border); box-shadow: none;">&larr;
+    <a href="{% url 'class-list' %}" class="btn btn-outline">&larr;
         Back to classes</a>
 </div>
 
@@ -105,7 +104,7 @@
             {% if user.is_authenticated %}
             {% if already_booked %}
             <div
-                style="background: #e0e7ff; color: #3730a3; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid #c7d2fe;">
+                style="background: #dcfce7; color: #166534; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid #86efac;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>

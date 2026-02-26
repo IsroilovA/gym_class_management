@@ -59,7 +59,7 @@
                 0 / {{ class.max_capacity }} spots
                 {% endif %}
             </span>
-            <a href="{% url 'class-detail' class.pk %}" class="btn" style="padding: 6px 12px; font-size: 0.85rem;">View
+            <a href="{% url 'class-detail' class.pk %}" class="btn btn-sm">View
                 Details</a>
         </div>
     </div>
@@ -72,9 +72,7 @@
     <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 1.05rem;">Want to book a class?</p>
     <div style="display: flex; gap: 10px; justify-content: center;">
         <a href="{% url 'login' %}" class="btn">Log in</a>
-        <a href="{% url 'register' %}" class="btn"
-            style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">Create an
-            account</a>
+        <a href="{% url 'register' %}" class="btn btn-outline">Create an account</a>
     </div>
 </div>
 {% endif %}

@@ -39,9 +39,7 @@
                 booking.booked_at|date:"M d, Y" }}</p>
             <form method="post" action="{% url 'booking-cancel' booking.pk %}" style="display:inline; margin:0;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger"
-                    onclick="return confirm('Cancel this booking?')"
-                    style="padding: 6px 12px; font-size: 0.85rem;">Cancel</button>
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this booking?')">Cancel</button>
             </form>
         </div>
     </div>
@@ -49,8 +47,7 @@
 </div>
 
 <div style="margin-top: 30px; text-align: center;">
-    <a href="{% url 'class-list' %}" class="btn"
-        style="background-color: var(--surface); color: var(--text-main); border: 1px solid var(--border);">Browse more
+    <a href="{% url 'class-list' %}" class="btn btn-outline">Browse more
         classes</a>
 </div>
 
