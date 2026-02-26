@@ -3,35 +3,136 @@
 {% block title %}{{ object.name }} - Gym App{% endblock %}
 
 {% block content %}
-<h1>{{ object.name }}</h1>
-
-{% if object.description %}
-<p>{{ object.description }}</p>
-{% endif %}
-
-<table>
-    <tr><th>Trainer</th><td>{{ object.trainer|default:"TBA" }}{% if object.trainer and object.trainer.bio %} — {{ object.trainer.bio }}{% endif %}</td></tr>
-    <tr><th>Date &amp; Time</th><td>{{ object.scheduled_at|date:"M d, Y H:i" }}</td></tr>
-    <tr><th>Duration</th><td>{{ object.duration_minutes }} min</td></tr>
-    <tr><th>Availability</th><td>{{ object.available_spots_display }} / {{ object.max_capacity }} spots</td></tr>
-</table>
-
-<div style="margin-top: 20px;">
-    {% if user.is_authenticated %}
-        {% if already_booked %}
-            <p><strong>You have already booked this class.</strong></p>
-        {% elif not object.is_full %}
-            <form method="post" action="{% url 'booking-create' object.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn">Book This Class</button>
-            </form>
-        {% else %}
-            <p><strong>This class is full.</strong></p>
-        {% endif %}
-    {% else %}
-        <p><a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to book this class.</p>
-    {% endif %}
+<div class="page-header">
+    <h1>{{ object.name }}</h1>
+    <a href="{% url 'class-list' %}" class="btn"
+        style="background: white; color: var(--text-main); border: 1px solid var(--border); box-shadow: none;">&larr;
+        Back to classes</a>
 </div>
 
-<p style="margin-top: 15px;"><a href="{% url 'class-list' %}">&larr; Back to all classes</a></p>
+<div class="detail-layout">
+    <div class="detail-main">
+        <h2 style="font-size: 1.5rem; margin-bottom: 15px;">About this Class</h2>
+        {% if object.description %}
+        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 30px;">
+            {{ object.description }}
+        </p>
+        {% else %}
+        <p
+            style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 30px; font-style: italic;">
+            No description provided for this class.
+        </p>
+        {% endif %}
+
+        <h3 style="font-size: 1.25rem; margin-bottom: 15px; border-top: 1px solid var(--border); padding-top: 30px;">
+            Trainer Information</h3>
+        <div
+            style="display: flex; gap: 15px; align-items: center; background: #f8fafc; padding: 20px; border-radius: var(--radius-md);">
+            <div
+                style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600;">
+                {% if object.trainer %}
+                {{ object.trainer.first_name|slice:":1"|upper }}
+                {% else %}
+                T
+                {% endif %}
+            </div>
+            <div>
+                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">{{
+                    object.trainer|default:"TBA" }}</p>
+                {% if object.trainer and object.trainer.bio %}
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">{{ object.trainer.bio }}</p>
+                {% else %}
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">Fitness Instructor</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-sidebar">
+        <div style="margin-bottom: 25px;">
+            {% if object.is_full %}
+            <span class="badge badge-danger" style="font-size: 0.85rem; padding: 6px 12px;">Class Full</span>
+            {% else %}
+            <span class="badge badge-success" style="font-size: 0.85rem; padding: 6px 12px;">Available to Book</span>
+            {% endif %}
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">Date & Time</span>
+            <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                {{ object.scheduled_at|date:"M d, Y H:i" }}
+            </div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">Duration</span>
+            <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                {{ object.duration_minutes }} min
+            </div>
+        </div>
+
+        <div class="info-group">
+            <span class="info-label">Availability</span>
+            <div class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                {% if not object.is_full %}
+                {{ object.available_spots_display }} / {{ object.max_capacity }} spots
+                {% else %}
+                0 / {{ object.max_capacity }} spots
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+            {% if user.is_authenticated %}
+            {% if already_booked %}
+            <div
+                style="background: #e0e7ff; color: #3730a3; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid #c7d2fe;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <p style="margin: 0; font-weight: 600;">You are booked for this class!</p>
+            </div>
+            {% elif not object.is_full %}
+            <form method="post" action="{% url 'booking-create' object.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 1.05rem;">Book This
+                    Class</button>
+            </form>
+            {% else %}
+            <button class="btn btn-danger" disabled
+                style="width: 100%; padding: 12px; font-size: 1.05rem; opacity: 0.7; cursor: not-allowed;">Class is
+                Full</button>
+            {% endif %}
+            {% else %}
+            <div
+                style="background: #f8fafc; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border);">
+                <p style="margin-bottom: 10px; font-size: 0.95rem; color: var(--text-muted);">Please log in to book this
+                    class.</p>
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn" style="width: 100%;">Log in</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

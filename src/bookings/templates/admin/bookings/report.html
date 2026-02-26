@@ -4,40 +4,186 @@
 {% block title %}Bookings Per Class Report{% endblock %}
 
 {% block content %}
-<h1>Bookings Per Class Report</h1>
+<style>
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
 
-<table>
+    .report-table th,
+    .report-table td {
+        padding: 14px 20px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .report-table th {
+        background-color: #f9fafb;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+    }
+
+    .report-table tbody tr:hover {
+        background-color: #f3f4f6;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .capacity-progress {
+        width: 100%;
+        height: 8px;
+        margin-top: 6px;
+        display: block;
+        border: none;
+        border-radius: 999px;
+        overflow: hidden;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+    .capacity-progress::-webkit-progress-bar {
+        background-color: #e5e7eb;
+        border-radius: 999px;
+    }
+
+    .capacity-progress::-webkit-progress-value {
+        background-color: currentColor;
+        border-radius: 999px;
+        transition: width 0.3s ease;
+    }
+
+    .capacity-progress::-moz-progress-bar {
+        background-color: currentColor;
+        border-radius: 999px;
+        transition: width 0.3s ease;
+    }
+
+    .capacity-safe {
+        background-color: #10b981;
+    }
+
+    .capacity-warn {
+        background-color: #f59e0b;
+    }
+
+    .capacity-full {
+        background-color: #ef4444;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-full {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-open {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #4f46e5;
+        font-weight: 600;
+        margin-top: 25px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: #4338ca;
+    }
+</style>
+
+<div style="margin-bottom: 20px;">
+    <h1 style="margin:0; font-size: 1.8rem; color: #111827;">Bookings Per Class Report</h1>
+    <p style="color: #6b7280; margin-top: 8px; font-size: 1rem;">Overview of class capacities and current booking
+        numbers.</p>
+</div>
+
+<table class="report-table">
     <thead>
         <tr>
-            <th>Class Name</th>
-            <th>Trainer</th>
-            <th>Scheduled At</th>
-            <th>Duration (min)</th>
-            <th>Max Capacity</th>
-            <th>Booked</th>
-            <th>Available Spots</th>
+            <th>Class Info</th>
+            <th>Date &amp; Time</th>
+            <th>Duration</th>
+            <th>Capacity Status</th>
+            <th>Availability</th>
         </tr>
     </thead>
     <tbody>
         {% for class in classes %}
         <tr>
-            <td>{{ class.name }}</td>
-            <td>{{ class.trainer|default:"TBA" }}</td>
-            <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
-            <td>{{ class.duration_minutes }}</td>
-            <td>{{ class.max_capacity }}</td>
-            <td>{{ class.booking_count }}</td>
-            <td>{{ class.available_spots }}</td>
+            <td>
+                <div style="font-weight: 600; color: #111827; font-size: 1.05rem;">{{ class.name }}</div>
+                <div style="color: #6b7280; font-size: 0.85rem; margin-top: 4px;">Trainer: {{
+                    class.trainer|default:"TBA" }}</div>
+            </td>
+            <td>
+                <div style="color: #111827; font-weight: 500;">{{ class.scheduled_at|date:"M d, Y" }}</div>
+                <div style="color: #6b7280; font-size: 0.85rem; margin-top: 2px;">{{ class.scheduled_at|date:"H:i" }}
+                </div>
+            </td>
+            <td>{{ class.duration_minutes }} min</td>
+            <td style="min-width: 150px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 2px;">
+                    <span style="font-weight: 600; color: #374151;">{{ class.booking_count }} / {{ class.max_capacity
+                        }}</span>
+                    <span style="color: #6b7280;">Booked</span>
+                </div>
+                {% if class.max_capacity %}
+                <progress class="capacity-progress {% if class.remaining_spots <= 0 %}capacity-full{% elif class.remaining_spots <= 3 %}capacity-warn{% else %}capacity-safe{% endif %}"
+                    value="{{ class.booking_count }}" max="{{ class.max_capacity }}">
+                </progress>
+                {% else %}
+                <progress class="capacity-progress capacity-full" value="0" max="1"></progress>
+                {% endif %}
+            </td>
+            <td>
+                {% if class.remaining_spots <= 0 %} <span class="badge badge-full">Full</span>
+                    {% else %}
+                    <span class="badge badge-open">{{ class.remaining_spots }} Spots Left</span>
+                    {% endif %}
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7">No classes found.</td>
+            <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280; font-size: 1.05rem;">
+                No classes found.
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<p style="margin-top: 20px;">
-    <a href="{% url 'admin:bookings_booking_changelist' %}">&larr; Back to Bookings</a>
-</p>
+<div>
+    <a href="{% url 'admin:bookings_booking_changelist' %}" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Bookings
+    </a>
+</div>
 {% endblock %}

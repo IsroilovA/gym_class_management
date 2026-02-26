@@ -3,11 +3,14 @@
 {% block title %}Register - Gym App{% endblock %}
 
 {% block content %}
-<h1>Create an Account</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Register</button>
-</form>
-<p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+<div class="auth-card">
+    <h1>Create an Account</h1>
+    <p class="subtitle">Join Gym App today</p>
+    <form method="post" class="form-group">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Register</button>
+    </form>
+    <p class="footer-text">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+</div>
 {% endblock %}

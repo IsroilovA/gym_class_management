@@ -3,46 +3,93 @@
 {% block title %}Available Classes - Gym App{% endblock %}
 
 {% block content %}
-<h1>Available Classes</h1>
+<div class="page-header">
+    <h1>Available Classes</h1>
+</div>
 
 {% if object_list %}
-<table>
-    <thead>
-        <tr>
-            <th>Class</th>
-            <th>Trainer</th>
-            <th>Date &amp; Time</th>
-            <th>Duration</th>
-            <th>Availability</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for class in object_list %}
-        <tr{% if class.is_full %} class="full-class"{% endif %}>
-            <td><a href="{% url 'class-detail' class.pk %}">{{ class.name }}</a></td>
-            <td>{{ class.trainer|default:"TBA" }}</td>
-            <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
-            <td>{{ class.duration_minutes }} min</td>
-            <td>
-                {% if class.is_full %}
-                    <strong>Full</strong>
+<div class="cards-grid">
+    {% for class in object_list %}
+    <div class="card">
+        <div class="card-header">
+            <a href="{% url 'class-detail' class.pk %}" class="card-title">{{ class.name }}</a>
+            {% if class.is_full %}
+            <span class="badge badge-danger">Full</span>
+            {% else %}
+            <span class="badge badge-success">Available</span>
+            {% endif %}
+        </div>
+
+        <div class="card-body">
+            <div class="card-detail">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>{{ class.trainer|default:"Trainer TBA" }}</span>
+            </div>
+
+            <div class="card-detail">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>{{ class.scheduled_at|date:"M d, Y H:i" }}</span>
+            </div>
+
+            <div class="card-detail">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>{{ class.duration_minutes }} min</span>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">
+                {% if not class.is_full %}
+                {{ class.available_spots_display }} / {{ class.max_capacity }} spots
                 {% else %}
-                    {{ class.available_spots_display }} / {{ class.max_capacity }}
+                0 / {{ class.max_capacity }} spots
                 {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </span>
+            <a href="{% url 'class-detail' class.pk %}" class="btn" style="padding: 6px 12px; font-size: 0.85rem;">View
+                Details</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
 {% if not user.is_authenticated %}
-<p style="margin-top: 15px;">
-    Want to book a class? <a href="{% url 'login' %}">Log in</a> or
-    <a href="{% url 'register' %}">create an account</a> to get started.
-</p>
+<div
+    style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; text-align: center; margin-top: 20px;">
+    <p style="margin-bottom: 15px; color: var(--text-muted); font-size: 1.05rem;">Want to book a class?</p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+        <a href="{% url 'login' %}" class="btn">Log in</a>
+        <a href="{% url 'register' %}" class="btn"
+            style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">Create an
+            account</a>
+    </div>
+</div>
 {% endif %}
 
 {% else %}
-<p>No classes are currently available.</p>
+<div
+    style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; text-align: center;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); margin-bottom: 15px;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <h3 style="margin-bottom: 5px;">No Classes Available</h3>
+    <p style="color: var(--text-muted);">Check back later for new class schedules.</p>
+</div>
 {% endif %}
 {% endblock %}
