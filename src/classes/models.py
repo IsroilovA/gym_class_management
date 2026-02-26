@@ -13,8 +13,23 @@ class Trainer(models.Model):
     class Meta:
         ordering = ['last_name', 'first_name']
 
+    @property
+    def display_name(self):
+        """Return a safe trainer name for UI display."""
+        full_name = f'{self.first_name} {self.last_name}'.strip()
+        # Defensive fallback in case template syntax accidentally lands in DB fields.
+        if not full_name or '{{' in full_name or '}}' in full_name:
+            return 'TBA'
+        return full_name
+
+    @property
+    def display_initial(self):
+        """Return a safe single-letter avatar initial."""
+        initial = (self.first_name or '').strip()[:1].upper()
+        return initial if initial.isalpha() else 'T'
+
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return self.display_name
 
 
 class GymClass(models.Model):

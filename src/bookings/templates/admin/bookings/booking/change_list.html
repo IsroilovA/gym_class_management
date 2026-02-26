@@ -1,8 +1,50 @@
 {% extends "admin/change_list.html" %}
 
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .object-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .object-tools .report-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            background: linear-gradient(135deg, #7b1e2b 0%, #661823 100%);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(123, 30, 43, 0.25);
+        }
+
+        .object-tools .report-link:hover {
+            background: linear-gradient(135deg, #661823 0%, #4f131c 100%);
+            color: #fff;
+        }
+
+        .object-tools .report-link svg {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
+{% endblock %}
+
 {% block object-tools-items %}
     <li>
-        <a href="{{ report_url }}">View Bookings Report</a>
+        <a href="{{ report_url }}" class="report-link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 19.5h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M7 16l3-3 2 2 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            View Bookings Report
+        </a>
     </li>
     {{ block.super }}
 {% endblock %}

@@ -57,7 +57,8 @@ class BookingCancelView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return Booking.objects.filter(member=self.request.user)
 
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         booking = self.get_object()
         messages.success(request, f'Booking for {booking.gym_class.name} cancelled.')
-        return super().delete(request, *args, **kwargs)
+        booking.delete()
+        return redirect(self.success_url)

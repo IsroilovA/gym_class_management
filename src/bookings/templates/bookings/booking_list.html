@@ -3,43 +3,71 @@
 {% block title %}My Bookings - Gym App{% endblock %}
 
 {% block content %}
-<h1>My Bookings</h1>
+<div class="page-header">
+    <h1>My Bookings</h1>
+</div>
 
 {% if object_list %}
-<table>
-    <thead>
-        <tr>
-            <th>Class</th>
-            <th>Trainer</th>
-            <th>Date &amp; Time</th>
-            <th>Booked At</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in object_list %}
-        <tr>
-            <td><a href="{% url 'class-detail' booking.gym_class.pk %}">{{ booking.gym_class.name }}</a></td>
-            <td>{{ booking.gym_class.trainer|default:"TBA" }}</td>
-            <td>{{ booking.gym_class.scheduled_at|date:"M d, Y H:i" }}</td>
-            <td>{{ booking.booked_at|date:"M d, Y H:i" }}</td>
-            <td>
-                <form method="post" action="{% url 'booking-cancel' booking.pk %}" style="display:inline" onclick="return confirm('Cancel this booking?')">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Cancel</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="cards-grid">
+    {% for booking in object_list %}
+    <div class="card">
+        <div class="card-header">
+            <a href="{% url 'class-detail' booking.gym_class.pk %}" class="card-title">{{ booking.gym_class.name }}</a>
+        </div>
+        <div class="card-body">
+            <div class="card-detail">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                {{ booking.gym_class.trainer.display_name|default:"TBA" }}
+            </div>
+            <div class="card-detail">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                {{ booking.gym_class.scheduled_at|date:"M d, Y H:i" }}
+            </div>
+        </div>
+        <div class="card-footer">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0; margin-right: auto;">Booked: {{
+                booking.booked_at|date:"M d, Y" }}</p>
+            <form method="post" action="{% url 'booking-cancel' booking.pk %}" style="display:inline; margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this booking?')">Cancel</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
-<p style="margin-top: 15px;">
-    <a href="{% url 'class-list' %}">Browse more classes</a>
-</p>
+<div style="margin-top: 30px; text-align: center;">
+    <a href="{% url 'class-list' %}" class="btn btn-outline">Browse more
+        classes</a>
+</div>
 
 {% else %}
-<p>You don't have any bookings yet.</p>
-<p><a href="{% url 'class-list' %}" class="btn">Browse Classes</a></p>
+<div class="auth-card"
+    style="text-align: center; margin-top: 40px; border: none; box-shadow: none; background: transparent;">
+    <div
+        style="width: 64px; height: 64px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+    </div>
+    <h2 style="margin-bottom: 10px;">No Bookings Yet</h2>
+    <p style="color: var(--text-muted); margin-bottom: 25px;">You haven't booked any classes yet. Start exploring our
+        gym classes and find the perfect workout for you!</p>
+    <a href="{% url 'class-list' %}" class="btn">Browse Classes</a>
+</div>
 {% endif %}
 {% endblock %}

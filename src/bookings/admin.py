@@ -50,7 +50,7 @@ class BookingAdmin(admin.ModelAdmin):
         classes = (
             GymClass.objects.select_related('trainer')
             .annotate(booking_count=Count('bookings'))
-            .annotate(available_spots=F('max_capacity') - F('booking_count'))
+            .annotate(remaining_spots=F('max_capacity') - F('booking_count'))
             .order_by('scheduled_at')
         )
         context = {
