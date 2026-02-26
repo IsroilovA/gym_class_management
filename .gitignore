@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 develop-eggs/
@@ -36,6 +37,9 @@ db.sqlite3-journal
 .env.local
 *.env
 
+# Docker
+docker-compose.override.yml
+
 # IDE
 .idea/
 .vscode/
@@ -51,5 +55,6 @@ Thumbs.db
 .coverage
 htmlcov/
 .tox/
+.pytest_cache/
 
 *.md
