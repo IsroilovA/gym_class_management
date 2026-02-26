@@ -121,9 +121,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'gym_db'),
-        'USER': os.environ.get('DB_USER', 'gym_user'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'NAME': os.environ.get('DB_NAME')
+        or os.environ.get('POSTGRES_DB')
+        or 'gym_db',
+        'USER': os.environ.get('DB_USER')
+        or os.environ.get('POSTGRES_USER')
+        or 'gym_user',
+        'PASSWORD': os.environ.get('DB_PASSWORD')
+        or os.environ.get('POSTGRES_PASSWORD')
+        or '',
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
     }
@@ -165,6 +171,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
