@@ -57,4 +57,7 @@ htmlcov/
 .tox/
 .pytest_cache/
 
+# TLS certificates (never commit real or self-signed certs)
+/certs/*.pem
+
 *.md

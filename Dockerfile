@@ -5,9 +5,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install minimal system deps (libpq for psycopg2-binary runtime)
+# Install minimal system deps (libpq for psycopg2-binary runtime, gosu for
+# dropping root privileges in entrypoint after fixing volume permissions)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -23,8 +25,6 @@ COPY . .
 # Make entrypoint executable & set ownership
 RUN chmod +x entrypoint.sh \
     && chown -R app:app /app
-
-USER app
 
 EXPOSE 8000
 
