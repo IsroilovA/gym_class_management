@@ -26,14 +26,20 @@
             <td>
                 <form method="post" action="{% url 'booking-cancel' booking.pk %}" style="display:inline" onclick="return confirm('Cancel this booking?')">
                     {% csrf_token %}
-                    <button type="submit" class="btn" style="background-color: #dc3545;">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Cancel</button>
                 </form>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<p style="margin-top: 15px;">
+    <a href="{% url 'class-list' %}">Browse more classes</a>
+</p>
+
 {% else %}
-<p>You have no bookings yet. <a href="{% url 'class-list' %}">Browse classes</a> to get started.</p>
+<p>You don't have any bookings yet.</p>
+<p><a href="{% url 'class-list' %}" class="btn">Browse Classes</a></p>
 {% endif %}
 {% endblock %}

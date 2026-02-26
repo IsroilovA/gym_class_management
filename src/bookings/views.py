@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -32,12 +33,17 @@ class BookingCreateView(LoginRequiredMixin, View):
     def post(self, request, class_id):
         gym_class = get_object_or_404(GymClass, pk=class_id)
 
-        if gym_class.available_spots <= 0:
-            messages.error(request, 'This class is full.')
+        booking = Booking(member=request.user, gym_class=gym_class)
+
+        try:
+            booking.full_clean()
+        except ValidationError as e:
+            for msg in e.messages:
+                messages.error(request, msg)
             return redirect('class-detail', pk=gym_class.pk)
 
         try:
-            Booking.objects.create(member=request.user, gym_class=gym_class)
+            booking.save()
         except IntegrityError:
             messages.warning(request, 'You have already booked this class.')
             return redirect('class-detail', pk=gym_class.pk)

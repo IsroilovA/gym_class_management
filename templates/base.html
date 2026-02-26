@@ -12,14 +12,23 @@
             padding: 20px;
         }
         nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #ccc;
         }
         nav a {
-            margin-right: 15px;
             text-decoration: none;
             color: #007bff;
+        }
+        nav .spacer {
+            flex-grow: 1;
+        }
+        nav .user-info {
+            color: #555;
+            font-size: 0.9em;
         }
         table {
             border-collapse: collapse;
@@ -41,25 +50,40 @@
             text-decoration: none;
             border-radius: 3px;
         }
+        .btn-danger {
+            background-color: #dc3545;
+        }
         .messages {
             list-style: none;
             padding: 0;
         }
         .success { color: green; }
         .error { color: red; }
+        .warning { color: #856404; }
         .info { color: blue; }
+        tr.full-class {
+            color: #999;
+            background-color: #f8f8f8;
+        }
     </style>
 </head>
 <body>
     <nav>
-        <a href="/classes/">Gym App</a>
+        <a href="{% url 'class-list' %}"><strong>Gym App</strong></a>
+        <a href="{% url 'class-list' %}">Browse Classes</a>
         {% if user.is_authenticated %}
             <a href="{% url 'booking-list' %}">My Bookings</a>
-            <form method="post" action="{% url 'logout' %}" style="display:inline">
+            {% if user.is_staff %}
+                <a href="{% url 'admin:index' %}">Admin</a>
+            {% endif %}
+            <span class="spacer"></span>
+            <span class="user-info">{{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display:inline; margin: 0;">
                 {% csrf_token %}
                 <button type="submit" class="btn">Logout</button>
             </form>
         {% else %}
+            <span class="spacer"></span>
             <a href="{% url 'login' %}">Login</a>
             <a href="{% url 'register' %}">Register</a>
         {% endif %}

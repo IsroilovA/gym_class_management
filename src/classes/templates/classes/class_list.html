@@ -18,16 +18,30 @@
     </thead>
     <tbody>
         {% for class in object_list %}
-        <tr>
+        <tr{% if class.available_spots == 0 %} class="full-class"{% endif %}>
             <td><a href="{% url 'class-detail' class.pk %}">{{ class.name }}</a></td>
             <td>{{ class.trainer|default:"TBA" }}</td>
             <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
             <td>{{ class.duration_minutes }} min</td>
-            <td>{{ class.available_spots }} / {{ class.max_capacity }}</td>
+            <td>
+                {% if class.available_spots == 0 %}
+                    <strong>Full</strong>
+                {% else %}
+                    {{ class.available_spots }} / {{ class.max_capacity }}
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+{% if not user.is_authenticated %}
+<p style="margin-top: 15px;">
+    Want to book a class? <a href="{% url 'login' %}">Log in</a> or
+    <a href="{% url 'register' %}">create an account</a> to get started.
+</p>
+{% endif %}
+
 {% else %}
 <p>No classes are currently available.</p>
 {% endif %}

@@ -43,5 +43,12 @@ class GymClass(models.Model):
 
     @property
     def available_spots(self):
-        """Return the number of remaining bookable spots."""
-        return self.max_capacity - self.bookings.count()
+        """Return the number of remaining bookable spots.
+
+        Uses the ``booking_count`` annotation when available to avoid
+        an extra query per instance.
+        """
+        count = getattr(self, 'booking_count', None)
+        if count is None:
+            count = self.bookings.count()
+        return self.max_capacity - count

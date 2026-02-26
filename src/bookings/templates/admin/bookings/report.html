@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Bookings Per Class Report{% endblock %}
+
+{% block content %}
+<h1>Bookings Per Class Report</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Class Name</th>
+            <th>Trainer</th>
+            <th>Scheduled At</th>
+            <th>Duration (min)</th>
+            <th>Max Capacity</th>
+            <th>Booked</th>
+            <th>Available Spots</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for class in classes %}
+        <tr>
+            <td>{{ class.name }}</td>
+            <td>{{ class.trainer|default:"TBA" }}</td>
+            <td>{{ class.scheduled_at|date:"M d, Y H:i" }}</td>
+            <td>{{ class.duration_minutes }}</td>
+            <td>{{ class.max_capacity }}</td>
+            <td>{{ class.booking_count }}</td>
+            <td>{{ class.available_spots }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No classes found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p style="margin-top: 20px;">
+    <a href="{% url 'admin:bookings_booking_changelist' %}">&larr; Back to Bookings</a>
+</p>
+{% endblock %}
