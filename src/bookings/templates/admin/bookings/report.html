@@ -137,7 +137,7 @@
             <td>
                 <div style="font-weight: 600; color: #111827; font-size: 1.05rem;">{{ class.name }}</div>
                 <div style="color: #6b7280; font-size: 0.85rem; margin-top: 4px;">Trainer: {{
-                    class.trainer|default:"TBA" }}</div>
+                    class.trainer.display_name|default:"TBA" }}</div>
             </td>
             <td>
                 <div style="color: #111827; font-weight: 500;">{{ class.scheduled_at|date:"M d, Y" }}</div>
@@ -152,7 +152,8 @@
                     <span style="color: #6b7280;">Booked</span>
                 </div>
                 {% if class.max_capacity %}
-                <progress class="capacity-progress {% if class.remaining_spots <= 0 %}capacity-full{% elif class.remaining_spots <= 3 %}capacity-warn{% else %}capacity-safe{% endif %}"
+                <progress
+                    class="capacity-progress {% if class.remaining_spots <= 0 %}capacity-full{% elif class.remaining_spots <= 3 %}capacity-warn{% else %}capacity-safe{% endif %}"
                     value="{{ class.booking_count }}" max="{{ class.max_capacity }}">
                 </progress>
                 {% else %}

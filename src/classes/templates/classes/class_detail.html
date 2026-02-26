@@ -30,14 +30,13 @@
             <div
                 style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600;">
                 {% if object.trainer %}
-                {{ object.trainer.first_name|slice:":1"|upper }}
+                {{ object.trainer.display_initial }}
                 {% else %}
                 T
                 {% endif %}
             </div>
             <div>
-                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">{{
-                    object.trainer|default:"TBA" }}</p>
+                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 2px;">{{ object.trainer.display_name|default:"TBA" }}</p>
                 {% if object.trainer and object.trainer.bio %}
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0;">{{ object.trainer.bio }}</p>
                 {% else %}
