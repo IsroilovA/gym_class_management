@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 
 class Trainer(models.Model):
@@ -45,13 +46,26 @@ class GymClass(models.Model):
         related_name='gym_classes',
     )
     scheduled_at = models.DateTimeField()
-    duration_minutes = models.PositiveIntegerField(default=60)
-    max_capacity = models.PositiveIntegerField()
+    duration_minutes = models.PositiveIntegerField(
+        default=60,
+        validators=[MinValueValidator(1)],
+    )
+    max_capacity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['scheduled_at']
         verbose_name_plural = 'Gym classes'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(duration_minutes__gte=1),
+                name='gymclass_duration_minutes_gte_1',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(max_capacity__gte=1),
+                name='gymclass_max_capacity_gte_1',
+            ),
+        ]
 
     def __str__(self):
         return self.name

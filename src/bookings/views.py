@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView
@@ -31,20 +32,20 @@ class BookingListView(LoginRequiredMixin, ListView):
 
 class BookingCreateView(LoginRequiredMixin, View):
     def post(self, request, class_id):
-        gym_class = get_object_or_404(GymClass, pk=class_id)
-
         try:
             booking = Booking.create_for_member(
                 member=request.user,
-                gym_class_id=gym_class.pk,
+                gym_class=GymClass(pk=class_id),
             )
+        except GymClass.DoesNotExist as exc:
+            raise Http404('Class not found.') from exc
         except IntegrityError:
             messages.warning(request, 'You have already booked this class.')
-            return redirect('class-detail', pk=gym_class.pk)
+            return redirect('class-detail', pk=class_id)
         except ValidationError as e:
             for msg in e.messages:
                 messages.error(request, msg)
-            return redirect('class-detail', pk=gym_class.pk)
+            return redirect('class-detail', pk=class_id)
 
         messages.success(request, f'Successfully booked {booking.gym_class.name}!')
         return redirect('booking-list')

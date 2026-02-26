@@ -1,3 +1,6 @@
+# Runtime note:
+# This project is PostgreSQL-only. Commands that validate migration consistency
+# (e.g. `manage.py makemigrations --check --dry-run`) require a reachable Postgres DB.
 asgiref==3.11.1
 Django==6.0.2
 iniconfig==2.3.0
