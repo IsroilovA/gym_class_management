@@ -1,9 +1,13 @@
+# docker-compose.yml — Base (shared between dev and prod)
+#
+# Dev:  docker compose up --build
+#       (auto-loads docker-compose.override.yml)
+#
+# Prod: docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
 services:
   db:
     image: postgres:17
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_DB: ${DB_NAME:?set DB_NAME}
       POSTGRES_USER: ${DB_USER:?set DB_USER}
@@ -18,7 +22,6 @@ services:
 
   app:
     build: .
-    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -31,19 +34,6 @@ services:
       DB_PORT: 5432
     volumes:
       - static_files:/app/staticfiles
-
-  nginx:
-    build: ./nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      app:
-        condition: service_healthy
-    volumes:
-      - static_files:/app/staticfiles:ro
-      - ./certs:/etc/nginx/certs:ro
 
 volumes:
   postgres_data:
