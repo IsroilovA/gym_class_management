@@ -29,7 +29,7 @@ RUN chmod +x entrypoint.sh \
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" || exit 1
+  CMD python -c "import http.client; conn = http.client.HTTPConnection('localhost', 8000, timeout=3); conn.request('GET', '/'); r = conn.getresponse(); assert r.status < 500, f'status {r.status}'" || exit 1
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--access-logfile", "-"]
