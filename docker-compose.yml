@@ -1,8 +1,5 @@
-# docker-compose.yml — Base (shared between dev and prod)
-#
-# Dev:  docker compose up --build
-#       (auto-loads docker-compose.override.yml)
-#
+# Base compose file shared by dev and prod.
+# Dev:  docker compose -f docker-compose.yml -f compose.dev.yml up --build
 # Prod: docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 services:
@@ -28,13 +25,14 @@ services:
     env_file:
       - .env
     environment:
-      # Override DB connection to point at the compose network hostname,
-      # not the localhost value from .env.
+      # Use service name inside the compose network.
       DB_HOST: db
       DB_PORT: 5432
     volumes:
       - static_files:/app/staticfiles
+      - media_files:/app/mediafiles
 
 volumes:
   postgres_data:
   static_files:
+  media_files:

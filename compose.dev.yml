@@ -1,0 +1,21 @@
+# Development overrides.
+# Usage: docker compose -f docker-compose.yml -f compose.dev.yml up --build
+
+services:
+  db:
+    ports:
+      - "5432:5432"
+    restart: "no"
+
+  app:
+    restart: "no"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - static_files:/app/staticfiles
+      - media_files:/app/mediafiles
+    environment:
+      DEBUG: "True"
+      ENVIRONMENT: development
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]

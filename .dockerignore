@@ -52,4 +52,4 @@ pytest.ini
 
 # Docker (avoid recursive context)
 docker-compose.yml
-docker-compose.override.yml
+compose.dev.yml
