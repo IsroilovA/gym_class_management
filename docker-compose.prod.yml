@@ -1,17 +1,5 @@
-# docker-compose.prod.yml — Production overrides (must be specified explicitly)
-#
-# Usage:
-#   docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-#
-# The --env-file flag ensures Compose resolves ${VAR} placeholders (e.g., DB_NAME
-# in the base file) from .env.prod instead of the default .env.
-#
-# This file adds production-specific configuration:
-#   - Gunicorn (Dockerfile CMD, no override)
-#   - Nginx reverse proxy with TLS
-#   - No host-exposed DB or app ports
-#   - Restart policies and log rotation
-#   - Production env vars (DEBUG=False, ENVIRONMENT=production)
+# Production overrides.
+# Usage: docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 services:
   db:
@@ -46,6 +34,7 @@ services:
         condition: service_healthy
     volumes:
       - static_files:/app/staticfiles:ro
+      - media_files:/app/mediafiles:ro
       - ./certs:/etc/nginx/certs:ro
     logging:
       driver: json-file

@@ -9,6 +9,12 @@ class Trainer(models.Model):
     last_name = models.CharField(max_length=100)
     bio = models.TextField(blank=True)
     specialisation = models.CharField(max_length=200)
+    photo = models.ImageField(
+        upload_to='trainers/',
+        blank=True,
+        null=True,
+        help_text='Trainer profile photo.',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

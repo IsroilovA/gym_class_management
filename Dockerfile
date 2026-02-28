@@ -1,28 +1,49 @@
-FROM python:3.13-slim
+# Build dependencies in an isolated stage.
+FROM python:3.13-alpine AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    jpeg-dev \
+    zlib-dev
+
+# Keep dependencies in a dedicated venv for copying to runtime.
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements/base.txt requirements/base.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements/base.txt
+
+# Minimal runtime image.
+FROM python:3.13-alpine AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install minimal system deps (libpq for psycopg2-binary runtime, gosu for
-# dropping root privileges in entrypoint after fixing volume permissions)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    gosu \
-    && rm -rf /var/lib/apt/lists/*
+# Runtime shared libs only (no compiler toolchain).
+RUN apk add --no-cache \
+    libpq \
+    jpeg \
+    zlib \
+    su-exec
 
-# Create non-root user
-RUN addgroup --system app && adduser --system --ingroup app app
+# Run as non-root.
+RUN addgroup -S app && adduser -S -G app app
 
-# Install Python deps (cached layer — only busted when base.txt changes)
-COPY requirements/base.txt requirements/base.txt
-RUN pip install --no-cache-dir -r requirements/base.txt
+# Copy prebuilt virtualenv from builder.
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy application code
+# Copy app source.
 COPY . .
 
-# Make entrypoint executable & set ownership
+# Prepare entrypoint and ownership.
 RUN chmod +x entrypoint.sh \
     && chown -R app:app /app
 
