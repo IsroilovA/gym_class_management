@@ -11,7 +11,6 @@ from src.bookings.models import Booking
 @pytest.fixture
 def user_factory(db):
     """Factory fixture that creates User instances."""
-    created_users = []
     counter = [0]
 
     def _create_user(username=None, password='testpass123', **kwargs):
@@ -19,7 +18,6 @@ def user_factory(db):
         if username is None:
             username = f'testuser{counter[0]}'
         user = User.objects.create_user(username=username, password=password, **kwargs)
-        created_users.append(user)
         return user
 
     return _create_user
@@ -72,7 +70,12 @@ def gym_class_factory(db, trainer_factory):
 
 @pytest.fixture
 def booking_factory(db, user_factory, gym_class_factory):
-    """Factory fixture that creates Booking instances directly (bypassing validation)."""
+    """Factory fixture that creates Booking instances via bulk_create (bypassing save/full_clean).
+
+    This intentionally skips model validation so tests can create bookings
+    for past classes or over-capacity scenarios.  Do NOT copy this pattern
+    into production code — use Booking.create_for_member() instead.
+    """
     def _create_booking(member=None, gym_class=None, **kwargs):
         if member is None:
             member = user_factory()

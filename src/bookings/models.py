@@ -29,12 +29,12 @@ class Booking(models.Model):
         ]
 
     @classmethod
-    def create_for_member(cls, *, member, gym_class):
+    def create_for_member(cls, *, member, gym_class_id):
         """Create a booking atomically while enforcing booking rules."""
         from src.classes.models import GymClass
 
         with transaction.atomic():
-            locked_class = GymClass.objects.select_for_update().get(pk=gym_class.pk)
+            locked_class = GymClass.objects.select_for_update().get(pk=gym_class_id)
             cls.validate_booking_rules(member=member, gym_class=locked_class)
             return cls.objects.create(member=member, gym_class=locked_class)
 
@@ -79,5 +79,7 @@ class Booking(models.Model):
         )
 
     def save(self, *args, **kwargs):
+        # WARNING: bulk_create() bypasses save() and therefore skips full_clean().
+        # Never use bulk_create() on Booking in production code.
         self.full_clean()
         return super().save(*args, **kwargs)

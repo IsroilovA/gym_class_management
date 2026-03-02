@@ -10,11 +10,12 @@ class ClassListView(ListView):
     template_name = 'classes/class_list.html'
 
     def get_queryset(self):
-        return (
-            GymClass.objects.filter(scheduled_at__gte=timezone.now())
-            .select_related('trainer')
-            .annotate(booking_count=Count('members', distinct=True))
+        qs = GymClass.objects.select_related('trainer').annotate(
+            booking_count=Count('members', distinct=True),
         )
+        if not self.request.GET.get('show_past'):
+            qs = qs.filter(scheduled_at__gte=timezone.now())
+        return qs
 
 
 class ClassDetailView(DetailView):
@@ -22,7 +23,10 @@ class ClassDetailView(DetailView):
     template_name = 'classes/class_detail.html'
 
     def get_queryset(self):
-        return GymClass.objects.select_related('trainer')
+        return (
+            GymClass.objects.select_related('trainer')
+            .annotate(booking_count=Count('members', distinct=True))
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

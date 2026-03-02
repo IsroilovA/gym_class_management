@@ -3,8 +3,13 @@
 {% block title %}Available Classes - Gym App{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="page-header" style="display: flex; align-items: center; justify-content: space-between;">
     <h1>Available Classes</h1>
+    {% if request.GET.show_past %}
+    <a href="{% url 'class-list' %}" class="btn btn-sm btn-outline">Hide Past Classes</a>
+    {% else %}
+    <a href="{% url 'class-list' %}?show_past=1" class="btn btn-sm btn-outline">Show Past Classes</a>
+    {% endif %}
 </div>
 
 {% if object_list %}

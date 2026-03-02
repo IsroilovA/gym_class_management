@@ -18,6 +18,11 @@ class RegisterView(CreateView):
     template_name = 'registration/register.html'
     success_url = reverse_lazy('login')
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('class-list')
+        return super().dispatch(request, *args, **kwargs)
+
 
 class BookingListView(LoginRequiredMixin, ListView):
     model = Booking
@@ -35,7 +40,7 @@ class BookingCreateView(LoginRequiredMixin, View):
         try:
             booking = Booking.create_for_member(
                 member=request.user,
-                gym_class=GymClass(pk=class_id),
+                gym_class_id=class_id,
             )
         except GymClass.DoesNotExist as exc:
             raise Http404('Class not found.') from exc
@@ -58,8 +63,6 @@ class BookingCancelView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return Booking.objects.filter(member=self.request.user)
 
-    def post(self, request, *args, **kwargs):
-        booking = self.get_object()
-        messages.success(request, f'Booking for {booking.gym_class.name} cancelled.')
-        booking.delete()
-        return redirect(self.success_url)
+    def form_valid(self, form):
+        messages.success(self.request, f'Booking for {self.object.gym_class.name} cancelled.')
+        return super().form_valid(form)

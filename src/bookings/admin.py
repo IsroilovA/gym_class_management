@@ -12,7 +12,9 @@ from .models import Booking
 @admin.action(description='Cancel selected bookings')
 def cancel_selected_bookings(modeladmin, request, queryset):
     count = queryset.count()
-    queryset.delete()
+    # Bulk delete — no pre/post_delete signals depend on related fields.
+    # select_related added for forward-compatibility if signals are added later.
+    queryset.select_related('gym_class', 'member').delete()
     modeladmin.message_user(request, f'Successfully cancelled {count} booking(s).')
 
 

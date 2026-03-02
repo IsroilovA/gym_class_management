@@ -40,3 +40,12 @@ def test_register_post_invalid_passwords_mismatch(client, db):
     assert not User.objects.filter(username='newuser123').exists()
     assert 'form' in response.context
     assert response.context['form'].errors
+
+
+def test_register_redirects_authenticated_user(auth_client):
+    """Already logged-in users should be redirected away from register."""
+    client, user = auth_client
+    url = reverse('register')
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url == reverse('class-list')

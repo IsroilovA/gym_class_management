@@ -57,3 +57,16 @@ def test_class_detail_uses_correct_template(gym_class_factory, client):
     response = client.get(url)
 
     assert 'classes/class_detail.html' in [t.name for t in response.templates]
+
+
+def test_class_detail_annotates_booking_count(gym_class_factory, booking_factory, client):
+    """ClassDetailView queryset should annotate booking_count."""
+    gc = gym_class_factory(scheduled_at=future_datetime(days=1), max_capacity=10)
+    booking_factory(gym_class=gc)
+
+    url = reverse('class-detail', kwargs={'pk': gc.pk})
+    response = client.get(url)
+
+    obj = response.context['object']
+    assert hasattr(obj, 'booking_count')
+    assert obj.booking_count == 1

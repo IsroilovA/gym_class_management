@@ -19,8 +19,13 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
-load_dotenv(BASE_DIR / '.env')
+# Load environment variables from .env.<environment> file.
+# ENVIRONMENT is bootstrapped from os.environ before dotenv runs,
+# so it must be set by the shell or Docker env_file.
+_ENV_SUFFIX_MAP = {'development': 'dev', 'production': 'prod'}
+_env_name = os.environ.get('ENVIRONMENT', 'dev').lower()
+_env_suffix = _ENV_SUFFIX_MAP.get(_env_name, _env_name)
+load_dotenv(BASE_DIR / f'.env.{_env_suffix}')
 
 
 # Quick-start development settings - unsuitable for production
@@ -183,6 +188,42 @@ MEDIA_ROOT = BASE_DIR / 'mediafiles'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG' if DEBUG else 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO' if DEBUG else 'WARNING',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
 
 # Authentication
 LOGIN_URL = '/accounts/login/'

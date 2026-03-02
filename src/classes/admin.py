@@ -47,4 +47,4 @@ class GymClassAdmin(admin.ModelAdmin):
 
     @admin.display(description='Available Spots')
     def get_available_spots(self, obj):
-        return obj.max_capacity - obj.booking_count
+        return max(obj.max_capacity - obj.booking_count, 0)

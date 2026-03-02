@@ -73,7 +73,7 @@ def test_create_for_member_success_path(user_factory, gym_class_factory):
     user = user_factory()
     gym_class = gym_class_factory(scheduled_at=future_datetime(days=1))
 
-    booking = Booking.create_for_member(member=user, gym_class=gym_class)
+    booking = Booking.create_for_member(member=user, gym_class_id=gym_class.pk)
 
     assert booking.pk is not None
     assert booking.member == user
@@ -83,11 +83,8 @@ def test_create_for_member_success_path(user_factory, gym_class_factory):
 def test_create_for_member_raises_for_non_existent_class(user_factory):
     user = user_factory()
 
-    # Create an unsaved dummy class to have a mock ID
-    dummy_class = GymClass(pk=9999)
-
     with pytest.raises(GymClass.DoesNotExist):
-        Booking.create_for_member(member=user, gym_class=dummy_class)
+        Booking.create_for_member(member=user, gym_class_id=9999)
 
 
 def test_unique_constraint_integrity_at_db_level(booking_factory):

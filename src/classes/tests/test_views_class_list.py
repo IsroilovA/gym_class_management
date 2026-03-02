@@ -53,3 +53,16 @@ def test_class_list_uses_correct_template(gym_class_factory, client):
     response = client.get(url)
 
     assert 'classes/class_list.html' in [t.name for t in response.templates]
+
+
+def test_class_list_shows_past_classes_when_requested(gym_class_factory, client):
+    """Past classes should appear when ?show_past=1 is set."""
+    gym_class_factory(name='Future', scheduled_at=future_datetime(days=1))
+    gym_class_factory(name='Past', scheduled_at=past_datetime(days=1))
+
+    url = reverse('class-list') + '?show_past=1'
+    response = client.get(url)
+
+    names = [obj.name for obj in response.context['object_list']]
+    assert 'Future' in names
+    assert 'Past' in names

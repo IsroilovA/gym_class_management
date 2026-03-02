@@ -65,3 +65,22 @@ def test_gym_class_admin_display_methods(admin_client, gym_class_factory, bookin
     # Access the admin to verify it renders without errors
     response = admin_client.get('/admin/classes/gymclass/')
     assert response.status_code == 200
+
+
+def test_gym_class_admin_available_spots_never_negative(admin_client, gym_class_factory, booking_factory):
+    """Ensure get_available_spots clamps to 0 when over-booked."""
+    gc = gym_class_factory(max_capacity=1)
+    # Create 2 bookings via factory (bypasses validation) → over capacity
+    booking_factory(gym_class=gc)
+    booking_factory(gym_class=gc)
+
+    admin_site = AdminSite()
+    admin_instance = GymClassAdmin(GymClass, admin_site)
+
+    from django.test import RequestFactory
+    request = RequestFactory().get('/admin/classes/gymclass/')
+
+    qs = admin_instance.get_queryset(request)
+    obj = qs.get(pk=gc.pk)
+
+    assert admin_instance.get_available_spots(obj) == 0
