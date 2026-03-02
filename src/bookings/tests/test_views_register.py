@@ -4,11 +4,13 @@ from django.contrib.auth.models import User
 
 pytestmark = pytest.mark.integration
 
+
 def test_register_get(client):
     url = reverse('register')
     response = client.get(url)
     assert response.status_code == 200
     assert 'registration/register.html' in [t.name for t in response.templates]
+
 
 def test_register_post_valid(client, db):
     url = reverse('register')
@@ -21,8 +23,9 @@ def test_register_post_valid(client, db):
     response = client.post(url, data)
     assert response.status_code == 302
     assert response.url == reverse('login')
-    
+
     assert User.objects.filter(username='newuser123').exists()
+
 
 def test_register_post_invalid_passwords_mismatch(client, db):
     url = reverse('register')
