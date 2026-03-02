@@ -20,6 +20,8 @@
         <a href="{% url 'booking-list' %}">My Bookings</a>
         {% if user.is_staff %}
         <a href="{% url 'admin:index' %}">Admin</a>
+        <a href="{% url 'admin:bookings_booking_changelist' %}">Bookings Admin</a>
+        <a href="{% url 'admin:bookings_booking_report' %}">Bookings Report</a>
         {% endif %}
         <span class="spacer"></span>
         <span class="user-info">
