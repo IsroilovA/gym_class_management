@@ -50,6 +50,9 @@ staticfiles/
 .coveragerc
 pytest.ini
 
+# Certbot / Let's Encrypt state (private keys, not needed in image, was an error on VM)
+certbot/
+
 # Docker (avoid recursive context)
 docker-compose.yml
 compose.dev.yml
