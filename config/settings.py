@@ -58,7 +58,8 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 if IS_PRODUCTION and DEBUG:
     raise ImproperlyConfigured('DEBUG must be False in production.')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+raw_allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost')
+ALLOWED_HOSTS = [host.strip() for host in raw_allowed_hosts.split(',') if host.strip()]
 
 SECURE_SSL_REDIRECT = IS_PRODUCTION
 SESSION_COOKIE_SECURE = IS_PRODUCTION
