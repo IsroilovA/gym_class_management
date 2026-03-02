@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator
 
@@ -50,6 +51,13 @@ class GymClass(models.Model):
         null=True,
         blank=True,
         related_name='gym_classes',
+    )
+    # Explicit m2m for coursework compliance; Booking remains the join model.
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='bookings.Booking',
+        related_name='booked_classes',
+        blank=True,
     )
     scheduled_at = models.DateTimeField()
     duration_minutes = models.PositiveIntegerField(

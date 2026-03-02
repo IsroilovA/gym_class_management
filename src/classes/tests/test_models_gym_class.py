@@ -37,6 +37,41 @@ def test_gym_class_available_spots_without_annotation_with_bookings(db, booking_
     assert gym_class.available_spots == 3
 
 
+@pytest.mark.integration
+def test_gym_class_members_relation_resolves_through_booking(db, user_factory, gym_class_factory):
+    user = user_factory()
+    gym_class = gym_class_factory()
+
+    assert gym_class.members.filter(pk=user.pk).exists() is False
+
+    gym_class.bookings.create(member=user)
+
+    assert gym_class.members.filter(pk=user.pk).exists() is True
+
+
+@pytest.mark.integration
+def test_user_booked_classes_reverse_relation(db, user_factory, gym_class_factory):
+    user = user_factory()
+    gym_class = gym_class_factory()
+
+    gym_class.bookings.create(member=user)
+
+    assert user.booked_classes.filter(pk=gym_class.pk).exists() is True
+
+
+@pytest.mark.integration
+def test_members_count_matches_booking_rows(db, user_factory, gym_class_factory):
+    gym_class = gym_class_factory()
+    user1 = user_factory()
+    user2 = user_factory()
+
+    gym_class.bookings.create(member=user1)
+    gym_class.bookings.create(member=user2)
+
+    assert gym_class.bookings.count() == 2
+    assert gym_class.members.count() == 2
+
+
 @pytest.mark.unit
 def test_gym_class_is_full():
     gym_class = GymClass(name='Test', max_capacity=10, scheduled_at=future_datetime(days=1))

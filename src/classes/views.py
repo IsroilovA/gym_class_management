@@ -13,7 +13,7 @@ class ClassListView(ListView):
         return (
             GymClass.objects.filter(scheduled_at__gte=timezone.now())
             .select_related('trainer')
-            .annotate(booking_count=Count('bookings'))
+            .annotate(booking_count=Count('members', distinct=True))
         )
 
 
@@ -28,6 +28,6 @@ class ClassDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['already_booked'] = (
             self.request.user.is_authenticated
-            and self.object.bookings.filter(member=self.request.user).exists()
+            and self.object.members.filter(pk=self.request.user.pk).exists()
         )
         return context
