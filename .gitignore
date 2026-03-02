@@ -61,5 +61,4 @@ htmlcov/
 # TLS certificates and Let's Encrypt state (private keys, account keys, etc.)
 /certbot/
 
-*.md
-*.pdf
+/temp/
