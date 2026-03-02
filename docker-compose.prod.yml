@@ -1,5 +1,8 @@
 # Production overrides.
-# Usage: docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# APP_IMAGE is set via environment variable by CI (exact commit SHA tag),
+# or read from .env.prod as a fallback for manual use (:latest).
+# Usage: docker compose --env-file .env.prod \
+#          -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 services:
   db:
@@ -11,7 +14,7 @@ services:
         max-file: "3"
 
   app:
-    image: isroilov8/17102-gym-app:latest
+    image: ${APP_IMAGE}
     restart: unless-stopped
     env_file:
       - .env.prod

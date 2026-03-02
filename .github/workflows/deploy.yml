@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# Prevent overlapping deployments to the same server.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   # ── Stage 1: Code Quality ──────────────────────────────────────────
   lint:
@@ -81,6 +86,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    # Expose the full image reference so the deploy job can use the exact tag.
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+
     env:
       IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME || github.event.repository.name }}
 
@@ -97,9 +107,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract short SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Compute image metadata
+        id: meta
+        run: |
+          SHA_SHORT="$(git rev-parse --short HEAD)"
+          FULL_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${SHA_SHORT}"
+          echo "sha_short=${SHA_SHORT}"   >> "$GITHUB_OUTPUT"
+          echo "image=${FULL_IMAGE}"      >> "$GITHUB_OUTPUT"
+          echo "### Docker image" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${FULL_IMAGE}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -108,7 +126,7 @@ jobs:
           target: runtime
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.sha_short }}
+            ${{ steps.meta.outputs.image }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -120,7 +138,14 @@ jobs:
     needs: [docker]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
+    env:
+      # Immutable image reference built in the same workflow run.
+      APP_IMAGE: ${{ needs.docker.outputs.image }}
+      # Server directory — configurable via GitHub variable, with sensible default.
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR || '~/gym_class_management' }}
+
     steps:
+      # ── Pull & swap app container ──────────────────────────────────
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -128,28 +153,68 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
+          envs: APP_IMAGE,DEPLOY_DIR
           script: |
             set -e
 
-            # Navigate to project directory
-            cd /home/isroilov_an/gym_class_management
+            cd "$DEPLOY_DIR"
 
-            echo "==> Pulling latest app image from Docker Hub..."
-            docker compose --env-file .env.prod \
-              -f docker-compose.yml -f docker-compose.prod.yml \
-              pull app
+            COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
 
-            echo "==> Recreating app container (zero-downtime rolling update)..."
-            docker compose --env-file .env.prod \
-              -f docker-compose.yml -f docker-compose.prod.yml \
-              up -d --no-deps --wait app
+            echo "==> Deploying image: $APP_IMAGE"
+            export APP_IMAGE
 
-            echo "==> Verifying deployment health..."
-            docker compose --env-file .env.prod \
-              -f docker-compose.yml -f docker-compose.prod.yml \
-              ps app
+            echo "==> Pulling exact commit image..."
+            $COMPOSE pull app
+
+            echo "==> Recreating app container (minimal-downtime: db & nginx stay up)..."
+            $COMPOSE up -d --no-deps --wait app
+
+            echo "==> Container state after deploy:"
+            $COMPOSE ps
+
+            echo "==> Post-deploy health check (10 retries, 5 s apart)..."
+            RETRIES=10
+            DELAY=5
+            for i in $(seq 1 $RETRIES); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$($COMPOSE ps -q app)" 2>/dev/null || echo "unknown")
+              echo "    attempt $i/$RETRIES — health: $STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                echo "==> Health check passed."
+                break
+              fi
+              if [ "$i" -eq "$RETRIES" ]; then
+                echo "==> ERROR: app did not become healthy within $((RETRIES * DELAY))s"
+                exit 1
+              fi
+              sleep $DELAY
+            done
 
             echo "==> Cleaning up old images..."
             docker image prune -f
 
             echo "==> Deployment complete!"
+
+      # ── On failure: dump diagnostics ───────────────────────────────
+      - name: Dump diagnostics on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DEPLOY_DIR
+          script: |
+            cd "$DEPLOY_DIR"
+            COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
+
+            echo "========== docker compose ps =========="
+            $COMPOSE ps -a
+
+            echo ""
+            echo "========== app container logs (last 80 lines) =========="
+            $COMPOSE logs --tail=80 --no-color app || true
+
+            echo ""
+            echo "========== nginx container logs (last 40 lines) =========="
+            $COMPOSE logs --tail=40 --no-color nginx || true
