@@ -35,7 +35,7 @@ services:
     volumes:
       - static_files:/app/staticfiles:ro
       - media_files:/app/mediafiles:ro
-      - ./certs:/etc/nginx/certs:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
     logging:
       driver: json-file
       options:
