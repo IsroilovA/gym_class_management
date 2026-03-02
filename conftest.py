@@ -95,6 +95,7 @@ def auth_client(db, user_factory):
     client.login(username=user.username, password='testpass123')
     return client, user
 
+
 @pytest.fixture
 def admin_client(db, user_factory):
     """Return a logged-in Django test client with staff/superuser privileges."""
@@ -106,4 +107,3 @@ def admin_client(db, user_factory):
     client = Client()
     client.login(username='admin', password='testpass123')
     return client
-

@@ -8,3 +8,6 @@ Pygments==2.19.2
 pytest==9.0.2
 pytest-cov==6.1.1
 pytest-django==4.12.0
+
+# Linting
+flake8==7.1.2
