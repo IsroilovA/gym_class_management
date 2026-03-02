@@ -35,8 +35,7 @@
             </div>
         </div>
         <div class="card-footer">
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0; margin-right: auto;">Booked: {{
-                booking.booked_at|date:"M d, Y" }}</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0; margin-right: auto;">Booked: {{ booking.booked_at|date:"M d, Y" }}</p>
             <form method="post" action="{% url 'booking-cancel' booking.pk %}" style="display:inline; margin:0;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this booking?')">Cancel</button>
