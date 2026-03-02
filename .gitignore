@@ -34,6 +34,7 @@ db.sqlite3-journal
 
 # Environment — .env and .env.prod contain secrets; only .example files are committed
 .env
+.env.dev
 .env.local
 .env.prod
 
