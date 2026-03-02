@@ -8,7 +8,7 @@
     .report-table {
         width: 100%;
         border-collapse: collapse;
-        background: #fff;
+        background: var(--body-bg, #fff);
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -23,16 +23,16 @@
     }
 
     .report-table th {
-        background-color: #f9fafb;
+        background-color: var(--darkened-bg, #f9fafb);
         font-weight: 600;
-        color: #374151;
+        color: var(--body-fg, #374151);
         text-transform: uppercase;
         font-size: 0.85rem;
         letter-spacing: 0.05em;
     }
 
     .report-table tbody tr:hover {
-        background-color: #f3f4f6;
+        background-color: var(--selected-bg, #f3f4f6);
     }
 
     .report-table tbody tr:last-child td {
@@ -104,20 +104,20 @@
         align-items: center;
         gap: 6px;
         text-decoration: none;
-        color: #7b1e2b;
+        color: var(--link-fg, #7b1e2b);
         font-weight: 600;
         margin-top: 25px;
         transition: color 0.2s;
     }
 
     .back-link:hover {
-        color: #661823;
+        color: var(--link-hover-color, #661823);
     }
 </style>
 
 <div style="margin-bottom: 20px;">
-    <h1 style="margin:0; font-size: 1.8rem; color: #111827;">Bookings Per Class Report</h1>
-    <p style="color: #6b7280; margin-top: 8px; font-size: 1rem;">Overview of class capacities and current booking
+    <h1 style="margin:0; font-size: 1.8rem; color: var(--body-fg, #111827);">Bookings Per Class Report</h1>
+    <p style="color: var(--body-quiet-color, #6b7280); margin-top: 8px; font-size: 1rem;">Overview of class capacities and current booking
         numbers.</p>
 </div>
 
@@ -135,21 +135,19 @@
         {% for class in classes %}
         <tr>
             <td>
-                <div style="font-weight: 600; color: #111827; font-size: 1.05rem;">{{ class.name }}</div>
-                <div style="color: #6b7280; font-size: 0.85rem; margin-top: 4px;">Trainer: {{
-                    class.trainer.display_name|default:"TBA" }}</div>
+                <div style="font-weight: 600; color: var(--body-fg, #111827); font-size: 1.05rem;">{{ class.name }}</div>
+                <div style="color: var(--body-quiet-color, #6b7280); font-size: 0.85rem; margin-top: 4px;">Trainer: {% firstof class.trainer.display_name "TBA" %}</div>
             </td>
             <td>
-                <div style="color: #111827; font-weight: 500;">{{ class.scheduled_at|date:"M d, Y" }}</div>
-                <div style="color: #6b7280; font-size: 0.85rem; margin-top: 2px;">{{ class.scheduled_at|date:"H:i" }}
+                <div style="color: var(--body-fg, #111827); font-weight: 500;">{{ class.scheduled_at|date:"M d, Y" }}</div>
+                <div style="color: var(--body-quiet-color, #6b7280); font-size: 0.85rem; margin-top: 2px;">{{ class.scheduled_at|date:"H:i" }}
                 </div>
             </td>
             <td>{{ class.duration_minutes }} min</td>
             <td style="min-width: 150px;">
                 <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 2px;">
-                    <span style="font-weight: 600; color: #374151;">{{ class.booking_count }} / {{ class.max_capacity
-                        }}</span>
-                    <span style="color: #6b7280;">Booked</span>
+                    <span style="font-weight: 600; color: var(--body-fg, #374151);">{{ class.booking_count }} / {{ class.max_capacity }}</span>
+                    <span style="color: var(--body-quiet-color, #6b7280);">Booked</span>
                 </div>
                 {% if class.max_capacity %}
                 <progress
@@ -169,7 +167,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280; font-size: 1.05rem;">
+            <td colspan="5" style="text-align: center; padding: 40px; color: var(--body-quiet-color, #6b7280); font-size: 1.05rem;">
                 No classes found.
             </td>
         </tr>
