@@ -157,7 +157,8 @@ jobs:
           script: |
             set -e
 
-            cd "$DEPLOY_DIR"
+            RESOLVED_DEPLOY_DIR="${DEPLOY_DIR/#\~/$HOME}"
+            cd "$RESOLVED_DEPLOY_DIR"
 
             COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
 
@@ -174,10 +175,15 @@ jobs:
             $COMPOSE ps
 
             echo "==> Post-deploy health check (10 retries, 5 s apart)..."
+            APP_CONTAINER_ID="$($COMPOSE ps -q app)"
+            if [ -z "$APP_CONTAINER_ID" ]; then
+              echo "==> ERROR: app container id not found after deploy"
+              exit 1
+            fi
             RETRIES=10
             DELAY=5
             for i in $(seq 1 $RETRIES); do
-              STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$($COMPOSE ps -q app)" 2>/dev/null || echo "unknown")
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$APP_CONTAINER_ID" 2>/dev/null || echo "unknown")
               echo "    attempt $i/$RETRIES — health: $STATUS"
               if [ "$STATUS" = "healthy" ]; then
                 echo "==> Health check passed."
@@ -189,6 +195,16 @@ jobs:
               fi
               sleep $DELAY
             done
+
+            echo "==> Verifying deployed image matches expected immutable tag..."
+            RUNNING_IMAGE_ID="$(docker inspect --format='{{.Image}}' "$APP_CONTAINER_ID")"
+            EXPECTED_IMAGE_ID="$(docker image inspect --format='{{.Id}}' "$APP_IMAGE")"
+            echo "    expected image id: $EXPECTED_IMAGE_ID"
+            echo "    running  image id: $RUNNING_IMAGE_ID"
+            if [ "$RUNNING_IMAGE_ID" != "$EXPECTED_IMAGE_ID" ]; then
+              echo "==> ERROR: running app container image does not match APP_IMAGE ($APP_IMAGE)"
+              exit 1
+            fi
 
             echo "==> Cleaning up old images..."
             docker image prune -f
@@ -205,7 +221,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: DEPLOY_DIR
           script: |
-            cd "$DEPLOY_DIR"
+            RESOLVED_DEPLOY_DIR="${DEPLOY_DIR/#\~/$HOME}"
+            cd "$RESOLVED_DEPLOY_DIR"
             COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
 
             echo "========== docker compose ps =========="
