@@ -11,6 +11,7 @@ services:
         max-file: "3"
 
   app:
+    image: isroilov8/17102-gym-app:latest
     restart: unless-stopped
     env_file:
       - .env.prod
