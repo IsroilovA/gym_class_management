@@ -87,10 +87,6 @@ jobs:
     needs: [lint, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    # Expose the full image reference so the deploy job can use the exact tag.
-    outputs:
-      image: ${{ steps.meta.outputs.image }}
-
     env:
       IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME || github.event.repository.name }}
 
@@ -110,10 +106,9 @@ jobs:
       - name: Compute image metadata
         id: meta
         run: |
-          SHA_SHORT="$(git rev-parse --short HEAD)"
-          FULL_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${SHA_SHORT}"
-          echo "sha_short=${SHA_SHORT}"   >> "$GITHUB_OUTPUT"
-          echo "image=${FULL_IMAGE}"      >> "$GITHUB_OUTPUT"
+          SHA_TAG="${GITHUB_SHA}"
+          FULL_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${SHA_TAG}"
+          echo "image=${FULL_IMAGE}" >> "$GITHUB_OUTPUT"
           echo "### Docker image" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           echo "${FULL_IMAGE}" >> "$GITHUB_STEP_SUMMARY"
@@ -139,8 +134,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     env:
+      IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME || github.event.repository.name }}
       # Immutable image reference built in the same workflow run.
-      APP_IMAGE: ${{ needs.docker.outputs.image }}
+      APP_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME || github.event.repository.name }}:${{ github.sha }}
       # Server directory — configurable via GitHub variable, with sensible default.
       DEPLOY_DIR: ${{ vars.DEPLOY_DIR || '~/gym_class_management' }}
 
@@ -152,7 +148,6 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_stop: true
           envs: APP_IMAGE,DEPLOY_DIR
           script: |
             set -e
@@ -161,6 +156,11 @@ jobs:
             cd "$RESOLVED_DEPLOY_DIR"
 
             COMPOSE="docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml"
+
+            if [ -z "${APP_IMAGE:-}" ]; then
+              echo "==> ERROR: APP_IMAGE is empty. Check docker job outputs and secrets."
+              exit 1
+            fi
 
             echo "==> Deploying image: $APP_IMAGE"
             export APP_IMAGE
