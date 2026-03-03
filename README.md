@@ -1,6 +1,7 @@
 # Gym Class Management
 
-A full-stack web application for managing gym classes, trainers, and member bookings. Built with Django, PostgreSQL, and Nginx — containerised with Docker and deployed via a fully automated CI/CD pipeline.
+A full-stack web application for managing gym classes, trainers, and member bookings.
+Built with Django, PostgreSQL, and Nginx — containerised with Docker and deployed via a fully automated CI/CD pipeline.
 
 **Live:** [https://17102gymclasses.app](https://17102gymclasses.app)
 
@@ -27,7 +28,7 @@ A full-stack web application for managing gym classes, trainers, and member book
 - **User Authentication** — register, log in, and log out
 - **Class Browsing** — view all upcoming gym classes with availability indicators
 - **Class Details** — see trainer info, schedule, duration, and remaining spots
-- **Booking System** — book and cancel classes with real-time capacity enforcement
+- **Booking System** — book and cancel classes with real-time capacity enforcement; duplicate bookings, past-class bookings, and fully booked classes are rejected
 - **My Bookings** — personalised dashboard of all current bookings
 - **Admin Panel** — full CRUD management for trainers, classes, and bookings
 - **Static & Media Files** — served via Nginx with caching headers in production
@@ -79,7 +80,8 @@ The application uses **3 models** with the following relationships:
 ├── config/
 │   ├── settings.py             # Django settings (env-driven)
 │   ├── urls.py                 # Root URL configuration
-│   └── wsgi.py / asgi.py
+│   ├── wsgi.py                 # WSGI entry point
+│   └── asgi.py                 # ASGI entry point
 ├── src/
 │   ├── classes/                # GymClass & Trainer models, views, templates
 │   └── bookings/               # Booking model, views, forms, templates
@@ -131,7 +133,7 @@ The application uses **3 models** with the following relationships:
    cp .env.dev.example .env.dev
    ```
 
-   Edit `.env.dev` and adjust values as needed (defaults work out of the box).
+   Edit `.env.dev` if needed — the supplied defaults are ready to use without changes.
 
 3. **Start the development stack**
 
@@ -149,6 +151,12 @@ The application uses **3 models** with the following relationships:
 
    - App: [http://localhost:8000](http://localhost:8000)
    - Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
+
+6. **Stop the development stack**
+
+   ```bash
+   docker compose -f docker-compose.yml -f compose.dev.yml down
+   ```
 
 ---
 
@@ -221,7 +229,7 @@ The server only needs the configuration files (not the full source code):
      ps
    ```
 
-   The application should be accessible at `https://yourdomain.com`.
+   The application should be accessible at `https://<your-domain>`.
 
 > **Note:** After initial setup, all subsequent deployments are handled automatically by the CI/CD pipeline — no manual steps required.
 
@@ -277,7 +285,7 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) triggers on every *
 | 1 | **Lint** | Runs `flake8` for code quality checks | push & PR |
 | 2 | **Test** | Runs `pytest` against a PostgreSQL service container | push & PR |
 | 3 | **Docker Build & Push** | Builds the multi-stage image, tags with commit SHA + `latest`, pushes to Docker Hub | push only |
-| 4 | **Deploy** | SSHs into the server, pulls the new image, recreates the app container with zero-downtime, runs health checks | push only |
+| 4 | **Deploy** | SSHs into the server, pulls the new image, recreates the app container with minimal downtime (db & nginx stay up), runs health checks | push only |
 
 ### Required GitHub Secrets
 
@@ -320,6 +328,8 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) triggers on every *
 ### Admin Panel
 
 ![Admin panel](docs/screenshots/admin_panel.png)
+
+### Admin Panel — Model Management
 
 ![Admin panel — model management](docs/screenshots/admin_panel_2.png)
 
