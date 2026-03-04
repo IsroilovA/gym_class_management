@@ -355,3 +355,4 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) triggers on every *
 | 🌐 Live Application | [https://17102gymclasses.app](https://17102gymclasses.app) |
 | 📦 GitHub Repository | [https://github.com/IsroilovA/gym_class_management](https://github.com/IsroilovA/gym_class_management) |
 | 🐳 Docker Hub | [https://hub.docker.com/r/isroilov8/17102-gym-app](https://hub.docker.com/r/isroilov8/17102-gym-app) |
+
