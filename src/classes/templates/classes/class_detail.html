@@ -26,13 +26,13 @@
         <h3 style="font-size: 1.25rem; margin-bottom: 15px; border-top: 1px solid var(--border); padding-top: 30px;">
             Trainer Information</h3>
         <div
-            style="display: flex; gap: 15px; align-items: center; background: #f8fafc; padding: 20px; border-radius: var(--radius-md);">
+            style="display: flex; gap: 15px; align-items: center; background: var(--background); padding: 20px; border-radius: var(--radius-md);">
             {% if object.trainer and object.trainer.photo %}
             <img src="{{ object.trainer.photo.url }}" alt="{{ object.trainer.display_name }}"
                  style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
             {% else %}
             <div
-                style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600;">
+                style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: var(--primary-fg); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600;">
                 {% if object.trainer %}
                 {{ object.trainer.display_initial }}
                 {% else %}
@@ -108,7 +108,7 @@
             {% if user.is_authenticated %}
             {% if already_booked %}
             <div
-                style="background: #dcfce7; color: #166534; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid #86efac;">
+                style="background: var(--success-bg); color: var(--success-fg); padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--success-border);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 5px;">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -129,7 +129,7 @@
             {% endif %}
             {% else %}
             <div
-                style="background: #f8fafc; padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border);">
+                style="background: var(--background); padding: 15px; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border);">
                 <p style="margin-bottom: 10px; font-size: 0.95rem; color: var(--text-muted);">Please log in to book this
                     class.</p>
                 <a href="{% url 'login' %}?next={{ request.path }}" class="btn" style="width: 100%;">Log in</a>

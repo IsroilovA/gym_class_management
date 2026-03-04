@@ -14,8 +14,10 @@
         --body-bg: #f8fafc;
         --darkened-bg: #f1f5f9;
         --selected-bg: #eef2f7;
+        --selected-row: #fdf2f4;
         --hairline-color: #e2e8f0;
         --border-color: #e2e8f0;
+        --error-fg: #991b1b;
 
         --body-fg: #0f172a;
         --body-quiet-color: #64748b;
@@ -31,6 +33,24 @@
         --link-fg: #7b1e2b;
         --link-hover-color: #661823;
         --link-selected-fg: #661823;
+        --button-fg: #ffffff;
+        --button-bg: #7b1e2b;
+        --button-hover-bg: #661823;
+        --default-button-bg: #7b1e2b;
+        --default-button-hover-bg: #661823;
+        --close-button-bg: #64748b;
+        --close-button-hover-bg: #475569;
+        --delete-button-bg: #ef4444;
+        --delete-button-hover-bg: #dc2626;
+        --object-tools-fg: #ffffff;
+        --object-tools-bg: #7b1e2b;
+        --object-tools-hover-bg: #661823;
+        --message-success-bg: #dcfce7;
+        --success-fg: #166534;
+        --message-warning-bg: #fef9c3;
+        --message-error-bg: #fee2e2;
+        --message-info-bg: #eef2f7;
+        color-scheme: light;
     }
 
     #header {
@@ -59,6 +79,10 @@
     #nav-sidebar {
         background: #ffffff;
         border-right: 1px solid var(--border-color);
+    }
+
+    #nav-sidebar .current-model {
+        background: var(--selected-row);
     }
 </style>
 {% endblock %}
