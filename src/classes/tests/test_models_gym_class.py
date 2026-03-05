@@ -1,5 +1,7 @@
 import pytest
+from datetime import timedelta
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from src.classes.models import GymClass
 from tests.helpers import future_datetime
 
@@ -141,3 +143,16 @@ def test_gym_class_valid_constraints(db):
 def test_gym_class_str():
     gym_class = GymClass(name='Pilates', max_capacity=10, scheduled_at=future_datetime(days=1))
     assert str(gym_class) == 'Pilates'
+
+
+@pytest.mark.unit
+def test_gym_class_end_time():
+    """end_time should equal scheduled_at + duration_minutes."""
+    scheduled = timezone.now()
+    gym_class = GymClass(
+        name='Test',
+        max_capacity=10,
+        scheduled_at=scheduled,
+        duration_minutes=90,
+    )
+    assert gym_class.end_time == scheduled + timedelta(minutes=90)
