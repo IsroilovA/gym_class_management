@@ -1,6 +1,5 @@
 import pytest
 from django.urls import reverse
-from django.utils import timezone
 
 from tests.helpers import future_datetime, past_datetime
 
