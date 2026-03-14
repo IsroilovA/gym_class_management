@@ -537,6 +537,12 @@ a.link:hover {
     color: var(--success-fg);
 }
 
+.badge-available {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 0;
+}
+
 .badge-danger {
     background-color: var(--error-bg);
     color: var(--error-fg);
